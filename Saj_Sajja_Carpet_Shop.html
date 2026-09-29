@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saj Sajja — Carpet Showroom</title>
+<style>
+  :root{
+    --maroon:#7a1f2b;
+    --maroon-dark:#5c1620;
+    --gold:#c9973a;
+    --gold-light:#e9c886;
+    --cream:#faf6ee;
+    --cream-dark:#f0e9d8;
+    --ink:#2b2420;
+    --ink-soft:#665c52;
+    --line:#e3d9c6;
+    --danger:#b3261e;
+    --ok:#1e7a3c;
+    --shadow:0 4px 18px rgba(90,40,20,0.10);
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+  }
+  ::selection{background:var(--gold-light);}
+
+  /* ---------- utility ---------- */
+  button{
+    font-family:inherit;
+    cursor:pointer;
+    border:none;
+    border-radius:8px;
+    padding:10px 18px;
+    font-size:14px;
+    font-weight:600;
+    transition:transform .05s ease, box-shadow .15s ease, background .15s ease;
+  }
+  button:active{transform:translateY(1px);}
+  .btn-primary{background:var(--maroon);color:#fff;}
+  .btn-primary:hover{background:var(--maroon-dark);}
+  .btn-gold{background:var(--gold);color:#3a2a08;}
+  .btn-gold:hover{background:#b98a2f;}
+  .btn-outline{background:transparent;color:var(--maroon);border:1.5px solid var(--maroon);}
+  .btn-outline:hover{background:rgba(122,31,43,0.06);}
+  .btn-danger{background:transparent;color:var(--danger);border:1.5px solid var(--danger);}
+  .btn-danger:hover{background:rgba(179,38,30,0.08);}
+  button:disabled{opacity:.45;cursor:not-allowed;}
+  input,select,textarea{
+    font-family:inherit;
+    font-size:14px;
+    padding:9px 11px;
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+    color:var(--ink);
+    width:100%;
+  }
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,151,58,0.18);}
+  label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:5px;text-transform:uppercase;letter-spacing:.03em;}
+  .field{margin-bottom:14px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 18px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 18px;}
+  .card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--line);}
+  .hint{font-size:12.5px;color:var(--ink-soft);margin-top:4px;}
+  .pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:700;letter-spacing:.02em;}
+  .pill-ok{background:#e4f4e8;color:var(--ok);}
+  .pill-low{background:#fdecec;color:var(--danger);}
+  .pill-mid{background:#fbeed0;color:#8a5a05;}
+  .toast{
+    position:fixed;bottom:24px;right:24px;z-index:999;
+    background:var(--ink);color:#fff;padding:14px 20px;border-radius:10px;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:14px;font-weight:600;
+    opacity:0;transform:translateY(12px);transition:all .25s ease;pointer-events:none;
+    max-width:320px;
+  }
+  .toast.ok{background:#1e7a3c;}
+  .toast.err{background:#b3261e;}
+  .toast.show{opacity:1;transform:translateY(0);}
+
+  /* ---------- login ---------- */
+  #loginScreen{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(201,151,58,0.18), transparent 45%),
+      radial-gradient(circle at 80% 85%, rgba(122,31,43,0.20), transparent 45%),
+      var(--maroon-dark);
+  }
+  .login-box{
+    width:380px;background:var(--cream);border-radius:16px;padding:38px 34px 30px;
+    box-shadow:0 20px 60px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);
+  }
+  .login-brand{text-align:center;margin-bottom:26px;}
+  .login-brand .rug-icon{font-size:38px;line-height:1;}
+  .login-brand h1{font-size:21px;margin:8px 0 2px;color:var(--maroon);letter-spacing:.02em;}
+  .login-brand p{margin:0;font-size:12.5px;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase;}
+  .login-error{
+    background:#fdecec;color:var(--danger);border:1px solid #f3c6c3;border-radius:8px;
+    padding:9px 12px;font-size:13px;margin-bottom:14px;display:none;font-weight:600;
+  }
+  .login-actions{display:flex;gap:10px;margin-top:20px;}
+  .login-actions button{flex:1;}
+  .login-hint{margin-top:18px;text-align:center;font-size:12px;color:var(--ink-soft);}
+
+  /* ---------- app shell ---------- */
+  #appShell{display:none;min-height:100vh;}
+  .sidebar{
+    width:230px;background:linear-gradient(180deg,var(--maroon) 0%, var(--maroon-dark) 100%);
+    color:#fff;flex-shrink:0;display:flex;flex-direction:column;padding:22px 0;
+    position:fixed;top:0;left:0;bottom:0;
+  }
+  .sidebar-brand{padding:0 22px 22px;border-bottom:1px solid rgba(255,255,255,.15);margin-bottom:14px;}
+  .sidebar-brand .rug-icon{font-size:26px;}
+  .sidebar-brand h2{font-size:16px;margin:6px 0 2px;letter-spacing:.02em;}
+  .sidebar-brand span{font-size:10.5px;opacity:.75;text-transform:uppercase;letter-spacing:.08em;}
+  .nav-item{
+    display:flex;align-items:center;gap:11px;padding:12px 22px;color:rgba(255,255,255,.82);
+    font-size:14px;font-weight:600;cursor:pointer;border-left:3px solid transparent;
+    transition:background .15s ease;
+  }
+  .nav-item .ic{width:18px;text-align:center;font-size:15px;}
+  .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+  .nav-item.active{background:rgba(255,255,255,.14);border-left-color:var(--gold);color:#fff;}
+  .sidebar-foot{margin-top:auto;padding:14px 22px 0;border-top:1px solid rgba(255,255,255,.15);}
+  .sidebar-foot .user-line{font-size:12.5px;opacity:.8;margin-bottom:10px;}
+  .sidebar-foot button{width:100%;background:rgba(255,255,255,.12);color:#fff;}
+  .sidebar-foot button:hover{background:rgba(255,255,255,.22);}
+
+  .main{margin-left:230px;flex:1;min-height:100vh;display:flex;flex-direction:column;}
+  .topbar{
+    background:#fff;border-bottom:1px solid var(--line);padding:16px 30px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .topbar h1{font-size:19px;margin:0;color:var(--maroon);}
+  .topbar .sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .content{padding:26px 30px 50px;flex:1;}
+  .section{display:none;}
+  .section.active{display:block;}
+
+  /* dashboard cards */
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px;}
+  .stat-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;border:1px solid var(--line);border-top:3px solid var(--gold);}
+  .stat-card .num{font-size:26px;font-weight:800;color:var(--maroon);}
+  .stat-card .lbl{font-size:12.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  thead th{
+    text-align:left;background:var(--cream-dark);color:var(--ink-soft);
+    padding:11px 12px;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;
+    border-bottom:2px solid var(--line);position:sticky;top:0;
+  }
+  tbody td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  tbody tr:hover{background:#fbf7ee;}
+  .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--line);}
+  .toolbar{display:flex;gap:10px;align-items:flex-end;margin-bottom:18px;flex-wrap:wrap;}
+  .toolbar .field{margin-bottom:0;min-width:170px;}
+  .empty-state{padding:50px 20px;text-align:center;color:var(--ink-soft);}
+  .empty-state .ic{font-size:34px;margin-bottom:8px;}
+
+  .section-title{font-size:16px;font-weight:800;color:var(--maroon);margin:0 0 16px;display:flex;align-items:center;gap:8px;}
+  .panel{padding:24px;margin-bottom:20px;}
+  .thumb{width:46px;height:46px;border-radius:8px;object-fit:cover;border:1px solid var(--line);background:var(--cream-dark);}
+
+  /* purchase form image */
+  .photo-drop{
+    border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;
+    color:var(--ink-soft);font-size:13px;cursor:pointer;background:var(--cream-dark);
+  }
+  .photo-drop:hover{border-color:var(--gold);}
+  .photo-preview{max-width:100%;max-height:220px;border-radius:10px;margin-top:12px;display:none;border:1px solid var(--line);}
+
+  /* model browse grid */
+  .model-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+  .model-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;}
+  .model-card .img-box{height:140px;background:var(--cream-dark);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .model-card .img-box img{width:100%;height:100%;object-fit:cover;}
+  .model-card .img-box .ph{font-size:34px;color:var(--line);}
+  .model-card .body{padding:13px 14px;flex:1;display:flex;flex-direction:column;gap:4px;}
+  .model-card .ttl{font-weight:800;font-size:14.5px;color:var(--ink);}
+  .model-card .meta{font-size:12px;color:var(--ink-soft);}
+  .model-card .price{font-weight:800;color:var(--maroon);font-size:15px;margin-top:4px;}
+  .model-card .foot{padding:11px 14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+
+  /* sale detail */
+  .sale-layout{display:grid;grid-template-columns:280px 1fr;gap:22px;}
+  .sale-photo{background:var(--cream-dark);border-radius:var(--radius);border:1px solid var(--line);height:260px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .sale-photo img{width:100%;height:100%;object-fit:cover;}
+  .sale-photo .ph{font-size:48px;color:var(--line);}
+  .kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13.5px;}
+  .kv b{color:var(--ink);}
+  .kv span:first-child{color:var(--ink-soft);}
+
+  .modal-bg{position:fixed;inset:0;background:rgba(30,20,15,.5);display:none;align-items:center;justify-content:center;z-index:400;padding:20px;}
+  .modal-bg.show{display:flex;}
+  .modal{background:#fff;border-radius:14px;max-width:640px;width:100%;max-height:88vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+  .modal-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+  .modal-head h3{margin:0;color:var(--maroon);font-size:17px;}
+  .modal-close{background:none;border:none;font-size:20px;color:var(--ink-soft);padding:2px 6px;}
+  .modal-body{padding:22px;}
+  .modal-foot{padding:16px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;}
+
+  .tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+  .tab-btn{background:#fff;border:1.5px solid var(--line);color:var(--ink-soft);padding:8px 16px;border-radius:99px;font-size:13px;}
+  .tab-btn.active{background:var(--maroon);color:#fff;border-color:var(--maroon);}
+
+  .grand-total{
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--cream-dark);border:1px solid var(--gold-light);border-radius:10px;
+    padding:16px 20px;margin-top:16px;
+  }
+  .grand-total .lbl{font-size:13px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+  .grand-total .amt{font-size:24px;font-weight:800;color:var(--maroon);}
+
+  /* Printable invoice */
+  #printArea{display:none;}
+  .invoice{max-width:640px;margin:0 auto;padding:20px;}
+  .invoice h2{color:var(--maroon);margin-bottom:0;}
+  .invoice .biz-sub{color:var(--ink-soft);font-size:13px;margin-top:2px;}
+  .invoice hr{border:none;border-top:2px solid var(--maroon);margin:14px 0;}
+  .invoice table{margin-top:14px;}
+  .invoice td,.invoice th{border:1px solid #999;padding:8px;}
+  .invoice .totals{text-align:right;font-size:16px;font-weight:800;margin-top:14px;}
+
+  @media print{
+    body *{visibility:hidden;}
+    #printArea, #printArea *{visibility:visible;}
+    #printArea{display:block;position:absolute;top:0;left:0;width:100%;}
+  }
+
+  @media (max-width:980px){
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .sale-layout{grid-template-columns:1fr;}
+    .grid2,.grid3{grid-template-columns:1fr;}
+  }
+  @media (max-width:720px){
+    .sidebar{position:relative;width:100%;height:auto;flex-direction:row;overflow-x:auto;padding:10px;}
+    .sidebar-brand,.sidebar-foot{display:none;}
+    .nav-item{border-left:none;border-bottom:3px solid transparent;padding:10px 14px;white-space:nowrap;}
+    .nav-item.active{border-bottom-color:var(--gold);}
+    .main{margin-left:0;}
+    #appShell{flex-direction:column;}
+    .stat-grid{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-brand">
+      <div class="rug-icon">🧵</div>
+      <h1>Saj Sajja</h1>
+      <p>A Carpet Showroom</p>
+    </div>
+    <div class="login-error" id="loginError">Invalid Username or Password</div>
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="Enter username" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password">
+    </div>
+    <div class="login-actions">
+      <button class="btn-primary" style="flex:2" onclick="doLogin()">Login</button>
+      <button class="btn-outline" onclick="doExit()">Exit</button>
+    </div>
+    <div class="login-hint">Default credentials: <b>admin</b> / <b>admin</b></div>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="appShell">
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="rug-icon">🧵</div>
+      <h2>Saj Sajja</h2>
+      <span>Carpet Showroom</span>
+    </div>
+    <div class="nav-item active" data-view="dashboard" onclick="showView('dashboard')"><span class="ic">🏠</span> Dashboard</div>
+    <div class="nav-item" data-view="stock" onclick="showView('stock')"><span class="ic">📦</span> Stock</div>
+    <div class="nav-item" data-view="purchase" onclick="showView('purchase')"><span class="ic">➕</span> Purchase Entry</div>
+    <div class="nav-item" data-view="sell" onclick="showView('sell')"><span class="ic">🛒</span> Select &amp; Sell</div>
+    <div class="nav-item" data-view="income" onclick="showView('income')"><span class="ic">📊</span> Sales Report</div>
+    <div class="nav-item" data-view="users" onclick="showView('users')"><span class="ic">👤</span> Users</div>
+    <div class="sidebar-foot">
+      <div class="user-line">Signed in as <b id="sidebarUser">admin</b></div>
+      <button onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="topbarTitle">Dashboard</h1>
+        <div class="sub" id="topbarSub">Overview of your showroom</div>
+      </div>
+      <div style="font-size:13px;color:var(--ink-soft)" id="topbarDate"></div>
+    </div>
+
+    <div class="content">
+
+      <!-- ---------------- DASHBOARD ---------------- -->
+      <div class="section active" id="view-dashboard">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="num" id="statModels">0</div><div class="lbl">Carpet Models</div></div>
+          <div class="stat-card"><div class="num" id="statUnits">0</div><div class="lbl">Units In Stock</div></div>
+          <div class="stat-card"><div class="num" id="statBills">0</div><div class="lbl">Bills Raised</div></div>
+          <div class="stat-card"><div class="num" id="statRevenue">₹0</div><div class="lbl">Total Revenue</div></div>
+        </div>
+
+        <div class="card panel">
+          <div class="section-title">⚠️ Low Stock (5 or fewer units)</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Code</th><th>Type</th><th>Sub Type</th><th>Size</th><th>Stock</th></tr></thead>
+              <tbody id="lowStockBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card panel">
+          <div class="section-title">🧾 Recent Sales</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Bill #</th><th>Date</th><th>Customer</th><th>Carpet</th><th>Qty</th><th>Total</th></tr></thead>
+              <tbody id="recentSalesBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---------------- STOCK ---------------- -->
+      <div class="section" id="view-stock">
+        <div class="card panel">
+          <div class="section-title">📦 Stock Available</div>
+          <div class="toolbar">
+            <div class="field">
+              <label>Filter by Type</label>
+              <select id="stockTypeFilter" onchange="renderStock()"></select>
+            </div>
+            <button class="btn-outline" onclick="document.getElementById('stockTypeFilter').value='';renderStock();">Show All</button>
+            <div class="field" style="flex:1;min-width:200px">
+              <label>Search</label>
+              <input type="text" id="stockSearch" placeholder="Search code, material, description..." oninput="renderStock()">
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th></th><th>Code</th><th>Type</th><th>Sub Type</th><th>Size</th><th>Material</th>
+                <th>Cost Price</th><th>Stock</th><th>Selling Price</th><th>Description</th><th></th>
+              </tr></thead>
+              <tbody id="stockBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---------------- PURCHASE ENTRY ---------------- -->
+      <div class="section" id="view-purchase">
+        <div class="card panel">
+          <div class="section-title">➕ New Purchase / Stock Entry</div>
+          <form id="purchaseForm" onsubmit="return submitPurchase(event)">
+            <div class="grid3">
+              <div class="field">
+                <label>Code (auto)</label>
+                <input type="text" id="pCode" disabled>
+              </div>
+              <div class="field">
+                <label>Type</label>
+                <input type="text" id="pType" list="typeList" required placeholder="e.g. Bed Room">
+              </div>
+              <div class="field">
+                <label>Sub Type</label>
+                <input type="text" id="pSubType" list="subtypeList" required placeholder="e.g. Bed Room">
+              </div>
+            </div>
+            <div class="grid3">
+              <div class="field">
+                <label>Size</label>
+                <input type="text" id="pSize" required placeholder="e.g. 6*6">
+              </div>
+              <div class="field">
+                <label>Material</label>
+                <input type="text" id="pMaterial" required placeholder="e.g. Cotton">
+              </div>
+              <div class="field">
+                <label>Stock Quantity</label>
+                <input type="number" id="pStock" min="0" required>
+              </div>
+            </div>
+            <div class="grid2">
+              <div class="field">
+                <label>Cost Price (₹)</label>
+                <input type="number" id="pCost" min="0" required>
+              </div>
+              <div class="field">
+                <label>Selling Price (₹)</label>
+                <input type="number" id="pSelling" min="0" required>
+              </div>
+            </div>
+            <div class="field">
+              <label>Description</label>
+              <textarea id="pDescription" rows="3" required placeholder="Notes about quality, finish, etc."></textarea>
+            </div>
+            <div class="field">
+              <label>Photo (optional)</label>
+              <div class="photo-drop" onclick="document.getElementById('pPhotoInput').click()">
+                📷 Click to choose a carpet photo
+              </div>
+              <input type="file" id="pPhotoInput" accept="image/*" style="display:none" onchange="handlePhotoSelect(event)">
+              <img id="pPhotoPreview" class="photo-preview">
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px;">
+              <button type="submit" class="btn-primary">Add to Stock</button>
+              <button type="button" class="btn-outline" onclick="resetPurchaseForm()">Clear</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ---------------- SELECT & SELL ---------------- -->
+      <div class="section" id="view-sell">
+        <div id="sellBrowsePane">
+          <div class="card panel">
+            <div class="section-title">🛒 Select a Model to Sell</div>
+            <div class="toolbar">
+              <div class="field">
+                <label>Type</label>
+                <select id="sellTypeFilter" onchange="populateSellSubtypes();renderSellGrid();"></select>
+              </div>
+              <div class="field">
+                <label>Sub Type</label>
+                <select id="sellSubtypeFilter" onchange="renderSellGrid()"></select>
+              </div>
+              <div class="field" style="flex:1;min-width:200px">
+                <label>Search</label>
+                <input type="text" id="sellSearch" placeholder="Search..." oninput="renderSellGrid()">
+              </div>
+            </div>
+            <div class="model-grid" id="sellGrid"></div>
+          </div>
+        </div>
+
+        <div id="sellDetailPane" style="display:none;">
+          <div class="card panel">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+              <div class="section-title" style="margin:0;">🧾 Sale Entry</div>
+              <button class="btn-outline" onclick="backToBrowse()">← Back to browse</button>
+            </div>
+            <div class="sale-layout">
+              <div>
+                <div class="sale-photo" id="saleModelPhotoBox"><div class="ph">🧵</div></div>
+                <div style="margin-top:14px;">
+                  <div class="kv"><span>Code</span><b id="saleCode">-</b></div>
+                  <div class="kv"><span>Type</span><b id="saleType">-</b></div>
+                  <div class="kv"><span>Sub Type</span><b id="saleSubType">-</b></div>
+                  <div class="kv"><span>Size</span><b id="saleSize">-</b></div>
+                  <div class="kv"><span>Material</span><b id="saleMaterial">-</b></div>
+                  <div class="kv"><span>Available Stock</span><b id="saleStock">-</b></div>
+                  <div class="kv"><span>Unit Price</span><b id="saleUnitPrice">-</b></div>
+                </div>
+              </div>
+              <div>
+                <form id="saleForm" onsubmit="return submitSale(event)">
+                  <div class="grid2">
+                    <div class="field">
+                      <label>Bill No. (auto)</label>
+                      <input type="text" id="sBillNo" disabled>
+                    </div>
+                    <div class="field">
+                      <label>Bill Date</label>
+                      <input type="date" id="sDate" required>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label>Customer Name</label>
+                    <input type="text" id="sName" required placeholder="Full name">
+                  </div>
+                  <div class="grid2">
+                    <div class="field">
+                      <label>Contact No.</label>
+                      <input type="tel" id="sContact" required placeholder="10-digit mobile">
+                    </div>
+                    <div class="field">
+                      <label>Quantity</label>
+                      <input type="number" id="sQty" min="1" value="1" required oninput="recalcTotal()">
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label>Address</label>
+                    <textarea id="sAddress" rows="2" required></textarea>
+                  </div>
+                  <div class="grand-total">
+                    <span class="lbl">Total Amount</span>
+                    <span class="amt" id="sTotal">₹0</span>
+                  </div>
+                  <div class="hint" id="sQtyWarning" style="color:var(--danger);font-weight:700;display:none;margin-top:8px;">Required quantity is not present in stock.</div>
+                  <div style="display:flex;gap:10px;margin-top:18px;">
+                    <button type="submit" class="btn-primary" id="sellSubmitBtn">Confirm Sale</button>
+                    <button type="button" class="btn-gold" id="printBillBtn" style="display:none;" onclick="printBill(lastBillNo)">🖨️ Print Bill</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---------------- INCOME / SALES REPORT ---------------- -->
+      <div class="section" id="view-income">
+        <div class="card panel">
+          <div class="section-title">📊 Sales Report</div>
+          <div class="tabs">
+            <button class="tab-btn active" data-range="all" onclick="setIncomeRange('all')">All</button>
+            <button class="tab-btn" data-range="month" onclick="setIncomeRange('month')">This Month</button>
+            <button class="tab-btn" data-range="year" onclick="setIncomeRange('year')">This Year</button>
+            <button class="tab-btn" data-range="custom" onclick="setIncomeRange('custom')">Custom Range</button>
+          </div>
+          <div class="toolbar" id="customRangeRow" style="display:none;">
+            <div class="field"><label>From</label><input type="date" id="incFrom" onchange="renderIncome()"></div>
+            <div class="field"><label>To</label><input type="date" id="incTo" onchange="renderIncome()"></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Bill #</th><th>Date</th><th>Customer</th><th>Contact</th><th>Carpet</th><th>Size</th><th>Qty</th><th>Total</th><th></th></tr></thead>
+              <tbody id="incomeBody"></tbody>
+            </table>
+          </div>
+          <div class="grand-total">
+            <span class="lbl">Grand Total</span>
+            <span class="amt" id="incomeTotal">₹0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---------------- USERS ---------------- -->
+      <div class="section" id="view-users">
+        <div class="card panel">
+          <div class="section-title">👤 Add a New User</div>
+          <form id="userForm" onsubmit="return submitUser(event)">
+            <div class="grid3">
+              <div class="field">
+                <label>Username</label>
+                <input type="text" id="uUsername" required placeholder="e.g. reception">
+              </div>
+              <div class="field">
+                <label>Password</label>
+                <input type="password" id="uPassword" required placeholder="Choose a password">
+              </div>
+              <div class="field">
+                <label>Role</label>
+                <select id="uRole">
+                  <option value="admin">Admin (full access)</option>
+                  <option value="staff">Staff (sales &amp; stock only)</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary">Add User</button>
+          </form>
+        </div>
+
+        <div class="card panel">
+          <div class="section-title">👥 Existing Users</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Username</th><th>Role</th><th>Password</th><th></th></tr></thead>
+              <tbody id="usersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<datalist id="typeList"></datalist>
+<datalist id="subtypeList"></datalist>
+
+<div class="toast" id="toast"></div>
+
+<!-- Printable invoice area -->
+<div id="printArea">
+  <div class="invoice">
+    <h2>Saj Sajja</h2>
+    <div class="biz-sub">A Carpet Showroom — Sales Invoice</div>
+    <hr>
+    <div class="grid2" style="display:flex;justify-content:space-between;">
+      <div><b>Bill No:</b> <span id="pi-billno"></span></div>
+      <div><b>Date:</b> <span id="pi-date"></span></div>
+    </div>
+    <p><b>Customer:</b> <span id="pi-name"></span><br>
+    <b>Contact:</b> <span id="pi-contact"></span><br>
+    <b>Address:</b> <span id="pi-address"></span></p>
+    <table>
+      <thead><tr><th>Code</th><th>Type</th><th>Size</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr>
+          <td id="pi-code"></td><td id="pi-type"></td><td id="pi-size"></td>
+          <td id="pi-qty"></td><td id="pi-price"></td><td id="pi-total"></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="totals">Grand Total: ₹<span id="pi-grand"></span></div>
+    <p style="margin-top:30px;font-size:12px;color:#666;">Thank you for shopping with Saj Sajja!</p>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   DATA LAYER — localStorage-backed, mirrors the original
+   Access tables: Models & Billing
+   ========================================================= */
+const STORE_KEY = 'sajSajjaCarpetShopDB';
+
+function loadDB(){
+  let raw = localStorage.getItem(STORE_KEY);
+  if(raw){
+    try {
+      const parsed = JSON.parse(raw);
+      if(!parsed.users){ parsed.users = [{ username: "admin", password: "admin", role: "admin" }]; }
+      return parsed;
+    } catch(e){ /* fall through to seed */ }
+  }
+  // Seed with the data recovered from the original Details.mdb
+  const seed = {
+    users: [
+      { username: "admin", password: "admin", role: "admin" }
+    ],
+    models: [
+      {
+        code: 1, type: "Bed Room", subtype: "Bed Room", size: "6*6", material: "Cotton",
+        costPrice: 6000, stock: 1, selling: 8000,
+        description: "Good at quality and price efficient", photo: ""
+      }
+    ],
+    bills: [
+      {
+        billNo: 1, billDate: "2023-04-28", cname: "Aviskumar", contact: "4561237890",
+        address: "Ballarpur", quantity: 1, finalTotal: 8000, code: 1, type: "Bed Room",
+        size: "6*6", price: 8000
+      }
+    ]
+  };
+  saveDB(seed);
+  return seed;
+}
+function saveDB(db){ localStorage.setItem(STORE_KEY, JSON.stringify(db)); }
+
+let db = loadDB();
+let lastBillNo = null;
+let currentSaleModel = null;
+
+/* =========================================================
+   UTIL
+   ========================================================= */
+function money(n){ return '₹' + Number(n||0).toLocaleString('en-IN'); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(iso){
+  if(!iso) return '-';
+  const d = new Date(iso+'T00:00:00');
+  if(isNaN(d)) return iso;
+  return d.toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'});
+}
+function toast(msg, kind){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + (kind||'');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>{ t.className = 'toast ' + (kind||''); }, 2600);
+}
+function nextCode(){
+  if(db.models.length===0) return 1;
+  return Math.max(...db.models.map(m=>m.code)) + 1;
+}
+function nextBillNo(){
+  if(db.bills.length===0) return 1;
+  return Math.max(...db.bills.map(b=>b.billNo)) + 1;
+}
+function distinctTypes(){
+  return [...new Set(db.models.map(m=>m.type))].sort();
+}
+function subtypesForType(type){
+  return [...new Set(db.models.filter(m=>m.type===type).map(m=>m.subtype))].sort();
+}
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+let currentUser = null;
+function doLogin(){
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const match = db.users.find(x => x.username === u && x.password === p);
+  if(match){
+    currentUser = match;
+    document.getElementById('loginError').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appShell').style.display = 'flex';
+    document.getElementById('sidebarUser').textContent = match.username;
+    document.querySelector('.nav-item[data-view="users"]').style.display = match.role === 'admin' ? 'flex' : 'none';
+    refreshAll();
+    showView('dashboard');
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+function doExit(){
+  if(confirm('Exit the application?')){
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#7a1f2b;font-size:18px;">You may now close this tab.</div>';
+  }
+}
+function doLogout(){
+  currentUser = null;
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+document.getElementById('loginPass').addEventListener('keypress', e=>{ if(e.key==='Enter') doLogin(); });
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+const titles = {
+  dashboard: ['Dashboard','Overview of your showroom'],
+  stock: ['Stock Available','Browse and filter current inventory'],
+  purchase: ['Purchase Entry','Add a new carpet model to stock'],
+  sell: ['Select & Sell','Pick a model and complete a sale'],
+  income: ['Sales Report','Review revenue by period'],
+  users: ['Users','Manage who can sign in to this application']
+};
+function showView(view){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.view===view));
+  document.getElementById('topbarTitle').textContent = titles[view][0];
+  document.getElementById('topbarSub').textContent = titles[view][1];
+  if(view==='dashboard') renderDashboard();
+  if(view==='stock') renderStock();
+  if(view==='purchase') { resetPurchaseForm(); }
+  if(view==='sell') { backToBrowse(); renderSellFilters(); renderSellGrid(); }
+  if(view==='income') renderIncome();
+  if(view==='users') renderUsers();
+}
+document.getElementById('topbarDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+function refreshAll(){
+  renderDashboard();
+  populateDatalists();
+}
+function populateDatalists(){
+  const tl = document.getElementById('typeList');
+  const sl = document.getElementById('subtypeList');
+  tl.innerHTML = distinctTypes().map(t=>`<option value="${escapeHtml(t)}">`).join('');
+  sl.innerHTML = [...new Set(db.models.map(m=>m.subtype))].map(t=>`<option value="${escapeHtml(t)}">`).join('');
+}
+function escapeHtml(s){
+  return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+function renderDashboard(){
+  document.getElementById('statModels').textContent = db.models.length;
+  document.getElementById('statUnits').textContent = db.models.reduce((s,m)=>s+Number(m.stock||0),0);
+  document.getElementById('statBills').textContent = db.bills.length;
+  document.getElementById('statRevenue').textContent = money(db.bills.reduce((s,b)=>s+Number(b.finalTotal||0),0));
+
+  const low = db.models.filter(m=>Number(m.stock)<=5).sort((a,b)=>a.stock-b.stock);
+  document.getElementById('lowStockBody').innerHTML = low.length ? low.map(m=>`
+    <tr><td>${m.code}</td><td>${escapeHtml(m.type)}</td><td>${escapeHtml(m.subtype)}</td><td>${escapeHtml(m.size)}</td>
+    <td><span class="pill ${m.stock==0?'pill-low':'pill-mid'}">${m.stock} left</span></td></tr>
+  `).join('') : `<tr><td colspan="5" class="empty-state">All models are well stocked 🎉</td></tr>`;
+
+  const recent = [...db.bills].sort((a,b)=>b.billNo-a.billNo).slice(0,6);
+  document.getElementById('recentSalesBody').innerHTML = recent.length ? recent.map(b=>`
+    <tr><td>#${b.billNo}</td><td>${fmtDate(b.billDate)}</td><td>${escapeHtml(b.cname)}</td>
+    <td>${escapeHtml(b.type)} (${escapeHtml(b.size)})</td><td>${b.quantity}</td><td>${money(b.finalTotal)}</td></tr>
+  `).join('') : `<tr><td colspan="6" class="empty-state">No sales recorded yet</td></tr>`;
+}
+
+/* =========================================================
+   STOCK VIEW
+   ========================================================= */
+function renderStockFilterOptions(){
+  const sel = document.getElementById('stockTypeFilter');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">All Types</option>' + distinctTypes().map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+  sel.value = current;
+}
+function renderStock(){
+  renderStockFilterOptions();
+  const typeF = document.getElementById('stockTypeFilter').value;
+  const q = document.getElementById('stockSearch').value.trim().toLowerCase();
+  let rows = db.models.filter(m=>{
+    if(typeF && m.type!==typeF) return false;
+    if(q){
+      const hay = `${m.code} ${m.type} ${m.subtype} ${m.size} ${m.material} ${m.description}`.toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  }).sort((a,b)=>a.code-b.code);
+
+  const body = document.getElementById('stockBody');
+  if(rows.length===0){
+    body.innerHTML = `<tr><td colspan="11" class="empty-state"><div class="ic">📦</div>No matching stock items</td></tr>`;
+    return;
+  }
+  body.innerHTML = rows.map(m=>`
+    <tr>
+      <td>${m.photo ? `<img class="thumb" src="${m.photo}">` : `<div class="thumb" style="display:flex;align-items:center;justify-content:center;">🧵</div>`}</td>
+      <td>${m.code}</td>
+      <td>${escapeHtml(m.type)}</td>
+      <td>${escapeHtml(m.subtype)}</td>
+      <td>${escapeHtml(m.size)}</td>
+      <td>${escapeHtml(m.material)}</td>
+      <td>${money(m.costPrice)}</td>
+      <td><span class="pill ${m.stock==0?'pill-low':(m.stock<=5?'pill-mid':'pill-ok')}">${m.stock}</span></td>
+      <td>${money(m.selling)}</td>
+      <td style="max-width:220px;">${escapeHtml(m.description)}</td>
+      <td><button class="btn-danger" style="padding:6px 10px;font-size:12px;" onclick="deleteModel(${m.code})">Delete</button></td>
+    </tr>
+  `).join('');
+}
+function deleteModel(code){
+  if(!confirm('Remove this model from stock? This cannot be undone.')) return;
+  db.models = db.models.filter(m=>m.code!==code);
+  saveDB(db);
+  toast('Model removed from stock', 'ok');
+  renderStock();
+  populateDatalists();
+}
+
+/* =========================================================
+   PURCHASE ENTRY
+   ========================================================= */
+let pendingPhoto = "";
+function resetPurchaseForm(){
+  document.getElementById('purchaseForm').reset();
+  document.getElementById('pCode').value = nextCode();
+  document.getElementById('pPhotoPreview').style.display = 'none';
+  document.getElementById('pPhotoPreview').src = '';
+  pendingPhoto = "";
+  populateDatalists();
+}
+function handlePhotoSelect(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    pendingPhoto = ev.target.result;
+    const prev = document.getElementById('pPhotoPreview');
+    prev.src = pendingPhoto;
+    prev.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+function submitPurchase(e){
+  e.preventDefault();
+  const cost = Number(document.getElementById('pCost').value);
+  const selling = Number(document.getElementById('pSelling').value);
+  if(cost > selling){
+    toast('Cost Price must be less than Selling Price', 'err');
+    return false;
+  }
+  const model = {
+    code: nextCode(),
+    type: document.getElementById('pType').value.trim(),
+    subtype: document.getElementById('pSubType').value.trim(),
+    size: document.getElementById('pSize').value.trim(),
+    material: document.getElementById('pMaterial').value.trim(),
+    costPrice: cost,
+    stock: Number(document.getElementById('pStock').value),
+    selling: selling,
+    description: document.getElementById('pDescription').value.trim(),
+    photo: pendingPhoto
+  };
+  db.models.push(model);
+  saveDB(db);
+  toast('New carpet model added to stock', 'ok');
+  resetPurchaseForm();
+  return false;
+}
+
+/* =========================================================
+   SELECT & SELL
+   ========================================================= */
+function renderSellFilters(){
+  const typeSel = document.getElementById('sellTypeFilter');
+  const current = typeSel.value;
+  typeSel.innerHTML = '<option value="">All Types</option>' + distinctTypes().map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+  typeSel.value = current;
+  populateSellSubtypes();
+}
+function populateSellSubtypes(){
+  const type = document.getElementById('sellTypeFilter').value;
+  const subSel = document.getElementById('sellSubtypeFilter');
+  const current = subSel.value;
+  const subs = type ? subtypesForType(type) : [...new Set(db.models.map(m=>m.subtype))].sort();
+  subSel.innerHTML = '<option value="">All Sub Types</option>' + subs.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+  subSel.value = current;
+}
+function renderSellGrid(){
+  const type = document.getElementById('sellTypeFilter').value;
+  const sub = document.getElementById('sellSubtypeFilter').value;
+  const q = document.getElementById('sellSearch').value.trim().toLowerCase();
+  let rows = db.models.filter(m=>{
+    if(type && m.type!==type) return false;
+    if(sub && m.subtype!==sub) return false;
+    if(q){
+      const hay = `${m.code} ${m.type} ${m.subtype} ${m.size} ${m.material} ${m.description}`.toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  }).sort((a,b)=>a.code-b.code);
+
+  const grid = document.getElementById('sellGrid');
+  if(rows.length===0){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="ic">🔍</div>No models match your filters</div>`;
+    return;
+  }
+  grid.innerHTML = rows.map(m=>`
+    <div class="model-card">
+      <div class="img-box">${m.photo ? `<img src="${m.photo}">` : `<div class="ph">🧵</div>`}</div>
+      <div class="body">
+        <div class="ttl">${escapeHtml(m.type)} — ${escapeHtml(m.subtype)}</div>
+        <div class="meta">Code #${m.code} · ${escapeHtml(m.size)} · ${escapeHtml(m.material)}</div>
+        <div class="price">${money(m.selling)}</div>
+      </div>
+      <div class="foot">
+        <span class="pill ${m.stock==0?'pill-low':(m.stock<=5?'pill-mid':'pill-ok')}">${m.stock} in stock</span>
+        <button class="btn-primary" style="padding:7px 14px;font-size:12.5px;" ${m.stock<=0?'disabled':''} onclick="openSale(${m.code})">Sell</button>
+      </div>
+    </div>
+  `).join('');
+}
+function openSale(code){
+  const m = db.models.find(x=>x.code===code);
+  if(!m) return;
+  currentSaleModel = m;
+  document.getElementById('sellBrowsePane').style.display = 'none';
+  document.getElementById('sellDetailPane').style.display = 'block';
+
+  document.getElementById('saleModelPhotoBox').innerHTML = m.photo ? `<img src="${m.photo}">` : `<div class="ph">🧵</div>`;
+  document.getElementById('saleCode').textContent = m.code;
+  document.getElementById('saleType').textContent = m.type;
+  document.getElementById('saleSubType').textContent = m.subtype;
+  document.getElementById('saleSize').textContent = m.size;
+  document.getElementById('saleMaterial').textContent = m.material;
+  document.getElementById('saleStock').textContent = m.stock;
+  document.getElementById('saleUnitPrice').textContent = money(m.selling);
+
+  document.getElementById('saleForm').reset();
+  document.getElementById('sBillNo').value = nextBillNo();
+  document.getElementById('sDate').value = todayISO();
+  document.getElementById('sQty').value = 1;
+  document.getElementById('sQty').max = m.stock;
+  document.getElementById('sQtyWarning').style.display = 'none';
+  document.getElementById('sellSubmitBtn').style.display = 'inline-block';
+  document.getElementById('sellSubmitBtn').disabled = false;
+  document.getElementById('printBillBtn').style.display = 'none';
+  recalcTotal();
+}
+function backToBrowse(){
+  document.getElementById('sellBrowsePane').style.display = 'block';
+  document.getElementById('sellDetailPane').style.display = 'none';
+  currentSaleModel = null;
+}
+function recalcTotal(){
+  if(!currentSaleModel) return;
+  const qty = Number(document.getElementById('sQty').value)||0;
+  const warn = document.getElementById('sQtyWarning');
+  const submitBtn = document.getElementById('sellSubmitBtn');
+  if(qty > currentSaleModel.stock){
+    warn.style.display = 'block';
+    submitBtn.disabled = true;
+    document.getElementById('sTotal').textContent = money(0);
+    return;
+  }
+  warn.style.display = 'none';
+  submitBtn.disabled = false;
+  document.getElementById('sTotal').textContent = money(qty * currentSaleModel.selling);
+}
+function submitSale(e){
+  e.preventDefault();
+  const m = currentSaleModel;
+  if(!m) return false;
+  const qty = Number(document.getElementById('sQty').value);
+  if(qty <= 0 || qty > m.stock){
+    toast('Required quantity is not present in stock', 'err');
+    return false;
+  }
+  const name = document.getElementById('sName').value.trim();
+  if(!name){ toast('Please enter the customer name', 'err'); return false; }
+
+  const bill = {
+    billNo: nextBillNo(),
+    billDate: document.getElementById('sDate').value || todayISO(),
+    cname: name,
+    contact: document.getElementById('sContact').value.trim(),
+    address: document.getElementById('sAddress').value.trim(),
+    quantity: qty,
+    finalTotal: qty * m.selling,
+    code: m.code,
+    type: m.type,
+    size: m.size,
+    price: m.selling
+  };
+  db.bills.push(bill);
+  m.stock = m.stock - qty;
+  saveDB(db);
+
+  lastBillNo = bill.billNo;
+  toast('Carpet sold successfully — Bill #' + bill.billNo, 'ok');
+
+  document.getElementById('sellSubmitBtn').style.display = 'none';
+  document.getElementById('printBillBtn').style.display = 'inline-block';
+  document.getElementById('saleStock').textContent = m.stock;
+  renderDashboard();
+  return false;
+}
+
+/* =========================================================
+   INCOME / SALES REPORT
+   ========================================================= */
+let incomeRange = 'all';
+function setIncomeRange(range){
+  incomeRange = range;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.range===range));
+  document.getElementById('customRangeRow').style.display = range==='custom' ? 'flex' : 'none';
+  renderIncome();
+}
+function renderIncome(){
+  const now = new Date();
+  let rows = [...db.bills];
+
+  if(incomeRange==='month'){
+    rows = rows.filter(b=>{
+      const d = new Date(b.billDate+'T00:00:00');
+      return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+    });
+  } else if(incomeRange==='year'){
+    rows = rows.filter(b=>{
+      const d = new Date(b.billDate+'T00:00:00');
+      return d.getFullYear()===now.getFullYear();
+    });
+  } else if(incomeRange==='custom'){
+    const from = document.getElementById('incFrom').value;
+    const to = document.getElementById('incTo').value;
+    if(from) rows = rows.filter(b=>b.billDate >= from);
+    if(to) rows = rows.filter(b=>b.billDate <= to);
+  }
+
+  rows.sort((a,b)=>b.billNo-a.billNo);
+  const body = document.getElementById('incomeBody');
+  if(rows.length===0){
+    body.innerHTML = `<tr><td colspan="9" class="empty-state"><div class="ic">📄</div>No sales in this period</td></tr>`;
+  } else {
+    body.innerHTML = rows.map(b=>`
+      <tr>
+        <td>#${b.billNo}</td><td>${fmtDate(b.billDate)}</td><td>${escapeHtml(b.cname)}</td>
+        <td>${escapeHtml(b.contact)}</td><td>${escapeHtml(b.type)}</td><td>${escapeHtml(b.size)}</td>
+        <td>${b.quantity}</td><td>${money(b.finalTotal)}</td>
+        <td><button class="btn-outline" style="padding:6px 10px;font-size:12px;" onclick="printBill(${b.billNo})">Print</button></td>
+      </tr>
+    `).join('');
+  }
+  const total = rows.reduce((s,b)=>s+Number(b.finalTotal||0),0);
+  document.getElementById('incomeTotal').textContent = money(total);
+}
+
+/* =========================================================
+   USERS
+   ========================================================= */
+function renderUsers(){
+  document.getElementById('usersBody').innerHTML = db.users.map(u=>`
+    <tr>
+      <td>${escapeHtml(u.username)}</td>
+      <td><span class="pill ${u.role==='admin'?'pill-ok':'pill-mid'}">${u.role}</span></td>
+      <td>••••••••</td>
+      <td>${db.users.length>1 ? `<button class="btn-danger" style="padding:6px 10px;font-size:12px;" onclick="deleteUser('${encodeURIComponent(u.username)}')">Delete</button>` : ''}</td>
+    </tr>
+  `).join('');
+}
+function submitUser(e){
+  e.preventDefault();
+  const username = document.getElementById('uUsername').value.trim();
+  const password = document.getElementById('uPassword').value;
+  const role = document.getElementById('uRole').value;
+  if(db.users.some(u=>u.username.toLowerCase()===username.toLowerCase())){
+    toast('That username already exists', 'err');
+    return false;
+  }
+  db.users.push({ username, password, role });
+  saveDB(db);
+  toast('User "' + username + '" created', 'ok');
+  document.getElementById('userForm').reset();
+  renderUsers();
+  return false;
+}
+function deleteUser(encodedUsername){
+  const username = decodeURIComponent(encodedUsername);
+  if(db.users.length<=1){ toast("Can't delete the only remaining user", 'err'); return; }
+  if(currentUser && currentUser.username===username){ toast("You can't delete the account you're signed in as", 'err'); return; }
+  if(!confirm(`Delete user "${username}"?`)) return;
+  db.users = db.users.filter(u=>u.username!==username);
+  saveDB(db);
+  toast('User removed', 'ok');
+  renderUsers();
+}
+
+/* =========================================================
+   PRINT BILL
+   ========================================================= */
+function printBill(billNo){
+  const b = db.bills.find(x=>x.billNo===billNo);
+  if(!b){ toast('Bill not found', 'err'); return; }
+  document.getElementById('pi-billno').textContent = b.billNo;
+  document.getElementById('pi-date').textContent = fmtDate(b.billDate);
+  document.getElementById('pi-name').textContent = b.cname;
+  document.getElementById('pi-contact').textContent = b.contact;
+  document.getElementById('pi-address').textContent = b.address;
+  document.getElementById('pi-code').textContent = b.code;
+  document.getElementById('pi-type').textContent = b.type;
+  document.getElementById('pi-size').textContent = b.size;
+  document.getElementById('pi-qty').textContent = b.quantity;
+  document.getElementById('pi-price').textContent = money(b.price);
+  document.getElementById('pi-total').textContent = money(b.finalTotal);
+  document.getElementById('pi-grand').textContent = Number(b.finalTotal||0).toLocaleString('en-IN');
+  window.print();
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+resetPurchaseForm();
+</script>
+</body>
+</html>
